@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jianghuge.com API 测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>jianghuge.com API</h1>
+            <p>接口测试和演示页面</p>
+        </div>
+        
+        <div class="content">
+            <div class="grid">
+                <!-- 用户管理部分 -->
+                <div class="section">
+                    <h2>👥 用户管理</h2>
+                    
+                    <div class="form-group">
+                        <label>获取用户列表</label>
+                        <button id="getUsersBtn">获取所有用户</button>
+                        <button id="getUserByIdBtn">根据ID获取用户</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>创建新用户</label>
+                        <input type="text" id="userName" placeholder="用户名" />
+                        <input type="email" id="userEmail" placeholder="邮箱" />
+                        <input type="number" id="userAge" placeholder="年龄" />
+                        <button id="createUserBtn">创建用户</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>更新用户</label>
+                        <input type="number" id="updateUserId" placeholder="用户ID" />
+                        <input type="text" id="updateUserName" placeholder="新用户名" />
+                        <input type="email" id="updateUserEmail" placeholder="新邮箱" />
+                        <button id="updateUserBtn">更新用户</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>删除用户</label>
+                        <input type="number" id="deleteUserId" placeholder="用户ID" />
+                        <button id="deleteUserBtn">删除用户</button>
+                    </div>
+                    
+                    <div id="userResult" class="result" style="display: none;"></div>
+                </div>
+                
+                <!-- 产品管理部分 -->
+                <div class="section">
+                    <h2>📦 产品管理</h2>
+                    
+                    <div class="form-group">
+                        <label>获取产品列表</label>
+                        <button id="getProductsBtn">获取所有产品</button>
+                        <button id="getProductByIdBtn">根据ID获取产品</button>
+                        <button id="getProductCategoriesBtn">获取产品分类</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>筛选产品</label>
+                        <select id="categoryFilter">
+                            <option value="">所有分类</option>
+                            <option value="手机">手机</option>
+                            <option value="电脑">电脑</option>
+                            <option value="耳机">耳机</option>
+                        </select>
+                        <input type="number" id="minPrice" placeholder="最低价格" />
+                        <input type="number" id="maxPrice" placeholder="最高价格" />
+                        <button id="filterProductsBtn">筛选产品</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>创建新产品</label>
+                        <input type="text" id="productName" placeholder="产品名称" />
+                        <input type="number" id="productPrice" placeholder="价格" />
+                        <select id="productCategory">
+                            <option value="">选择分类</option>
+                            <option value="手机">手机</option>
+                            <option value="电脑">电脑</option>
+                            <option value="耳机">耳机</option>
+                        </select>
+                        <textarea id="productDescription" placeholder="产品描述"></textarea>
+                        <input type="number" id="productStock" placeholder="库存" />
+                        <button id="createProductBtn">创建产品</button>
+                    </div>
+                    
+                    <div id="productResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        
+        // 页面加载完成后绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，绑定事件...');
+            
+            // 绑定用户管理按钮事件
+            document.getElementById('getUsersBtn').addEventListener('click', getUsers);
+            document.getElementById('getUserByIdBtn').addEventListener('click', getUserById);
+            document.getElementById('createUserBtn').addEventListener('click', createUser);
+            document.getElementById('updateUserBtn').addEventListener('click', updateUser);
+            document.getElementById('deleteUserBtn').addEventListener('click', deleteUser);
+            // 绑定产品管理按钮事件
+            document.getElementById('getProductsBtn').addEventListener('click', getProducts);
+            document.getElementById('getProductByIdBtn').addEventListener('click', getProductById);
+            document.getElementById('getProductCategoriesBtn').addEventListener('click', getProductCategories);
+            document.getElementById('filterProductsBtn').addEventListener('click', filterProducts);
+            document.getElementById('createProductBtn').addEventListener('click', createProduct);
+            
+            console.log('事件绑定完成');
+        });
+        
+        // 通用请求函数
+        async function makeRequest(url, options = {}) {
+            try {
+                console.log('发送请求:', url, options);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                console.log('响应状态:', response.status);
+                
+                const data = await response.json();
+                console.log('响应数据:', data);
+                
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                console.error('请求失败:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // 显示结果
+        function showResult(containerId, result) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            
+            if (result.success) {
+                container.innerHTML = `
+                    <div class="status success">✅ 请求成功 (${result.status})</div>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="status error">❌ 请求失败</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        // 用户相关函数
+        async function getUsers() {
+            const result = await makeRequest(`${API_BASE}/users`);
+            showResult('userResult', result);
+        }
+        
+        async function getUserById() {
+            const id = prompt('请输入用户ID:');
+            if (!id) return;
+            
+            const result = await makeRequest(`${API_BASE}/users/${id}`);
+            showResult('userResult', result);
+        }
+        
+        async function createUser() {
+            try {
+                console.log('开始创建用户...');
+                
+                const name = document.getElementById('userName').value;
+                const email = document.getElementById('userEmail').value;
+                const age = document.getElementById('userAge').value;
+                
+                console.log('表单数据:', { name, email, age });
+                
+                if (!name || !email) {
+                    alert('用户名和邮箱是必填项！');
+                    return;
+                }
+                
+                console.log('发送请求到:', `${API_BASE}/users`);
+                
+                const result = await makeRequest(`${API_BASE}/users`, {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, age: age ? parseInt(age) : null })
+                });
+                
+                console.log('API响应:', result);
+                showResult('userResult', result);
+                
+                if (result.success) {
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userEmail').value = '';
+                    document.getElementById('userAge').value = '';
+                    alert('用户创建成功！');
+                } else {
+                    alert('用户创建失败: ' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('创建用户时出错: ' + error.message);
+                console.error('创建用户时出错:', error);
+            }
+        }
+        
+        async function updateUser() {
+            const id = document.getElementById('updateUserId').value;
+            const name = document.getElementById('updateUserName').value;
+            const email = document.getElementById('updateUserEmail').value;
+            
+            if (!id) {
+                alert('请输入用户ID！');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/users/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({ name, email })
+            });
+            
+            showResult('userResult', result);
+        }
+        
+        async function deleteUser() {
+            const id = document.getElementById('deleteUserId').value;
+            
+            if (!id) {
+                alert('请输入用户ID！');
+                return;
+            }
+            
+            if (!confirm('确定要删除这个用户吗？')) return;
+            
+            const result = await makeRequest(`${API_BASE}/users/${id}`, {
+                method: 'DELETE'
+            });
+            
+            showResult('userResult', result);
+        }
+        
+        // 产品相关函数
+        async function getProducts() {
+            const result = await makeRequest(`${API_BASE}/products`);
+            showResult('productResult', result);
+        }
+        
+        async function getProductById() {
+            const id = prompt('请输入产品ID:');
+            if (!id) return;
+            
+            const result = await makeRequest(`${API_BASE}/products/${id}`);
+            showResult('productResult', result);
+        }
+        
+        async function getProductCategories() {
+            const result = await makeRequest(`${API_BASE}/products/categories`);
+            showResult('productResult', result);
+        }
+        
+        async function filterProducts() {
+            const category = document.getElementById('categoryFilter').value;
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            
+            let url = `${API_BASE}/products?`;
+            const params = [];
+            
+            if (category) params.push(`category=${category}`);
+            if (minPrice) params.push(`minPrice=${minPrice}`);
+            if (maxPrice) params.push(`maxPrice=${maxPrice}`);
+            
+            url += params.join('&');
+            
+            const result = await makeRequest(url);
+            showResult('productResult', result);
+        }
+        
+        async function createProduct() {
+            const name = document.getElementById('productName').value;
+            const price = document.getElementById('productPrice').value;
+            const category = document.getElementById('productCategory').value;
+            const description = document.getElementById('productDescription').value;
+            const stock = document.getElementById('productStock').value;
+            
+            if (!name || !price || !category) {
+                alert('产品名称、价格和分类是必填项！');
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/products`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    price: parseFloat(price),
+                    category,
+                    description,
+                    stock: stock ? parseInt(stock) : 0
+                })
+            });
+            
+            showResult('productResult', result);
+            
+            if (result.success) {
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productCategory').value = '';
+                document.getElementById('productDescription').value = '';
+                document.getElementById('productStock').value = '';
+            }
+        }
+    </script>
+</body>
+</html> 
