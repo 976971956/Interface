@@ -1,12 +1,12 @@
-import { Redis } from '@upstash/redis';
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+// 简单的用户 API 函数，不依赖 Vercel KV
+let users = [
+  { id: 1, name: '张三', email: 'zhangsan@example.com', age: 25 },
+  { id: 2, name: '李四', email: 'lisi@example.com', age: 30 },
+  { id: 3, name: '王五', email: 'wangwu@example.com', age: 28 }
+];
 
 export default async function handler(req, res) {
-  console.log('Users function called:', req.method, req.url);
+  console.log('Users simple function called:', req.method, req.url);
   
   // 设置 CORS 头
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       // 获取单个用户
       if (req.url.match(/\/api\/users\/\d+$/)) {
         const userId = parseInt(req.url.split('/').pop());
-        const user = await redis.get(`user:${userId}`);
+        const user = users.find(u => u.id === userId);
         
         if (!user) {
           return res.status(404).json({
@@ -44,21 +44,6 @@ export default async function handler(req, res) {
       const url = new URL(req.url, 'http://localhost');
       const page = parseInt(url.searchParams.get('page')) || 1;
       const limit = parseInt(url.searchParams.get('limit')) || 10;
-      
-      // 获取所有用户ID
-      const userIds = await redis.smembers('users:list') || [];
-      const users = [];
-      
-      // 获取用户详情
-      for (const id of userIds) {
-        const user = await redis.get(`user:${id}`);
-        if (user) {
-          users.push(user);
-        }
-      }
-      
-      // 按ID排序
-      users.sort((a, b) => a.id - b.id);
       
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
@@ -92,7 +77,7 @@ export default async function handler(req, res) {
         body += chunk.toString();
       });
       
-      req.on('end', async () => {
+      req.on('end', () => {
         try {
           const { name, email, age } = JSON.parse(body);
           
@@ -104,19 +89,16 @@ export default async function handler(req, res) {
           }
           
           // 检查邮箱是否已存在
-          const existingUsers = await redis.smembers('users:list') || [];
-          for (const id of existingUsers) {
-            const user = await redis.get(`user:${id}`);
-            if (user && user.email === email) {
-              return res.status(400).json({
-                success: false,
-                error: '该邮箱已被注册'
-              });
-            }
+          const existingUser = users.find(u => u.email === email);
+          if (existingUser) {
+            return res.status(400).json({
+              success: false,
+              error: '该邮箱已被注册'
+            });
           }
           
           // 生成新用户ID
-          const newId = existingUsers.length > 0 ? Math.max(...existingUsers.map(id => parseInt(id))) + 1 : 1;
+          const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
           
           const newUser = {
             id: newId,
@@ -126,9 +108,8 @@ export default async function handler(req, res) {
             createdAt: new Date().toISOString()
           };
           
-          // 保存用户数据
-          await redis.set(`user:${newId}`, newUser);
-          await redis.sadd('users:list', newId);
+          // 保存用户数据（内存中）
+          users.push(newUser);
           
           res.setHeader('Content-Type', 'application/json');
           res.status(201).json({
@@ -153,36 +134,33 @@ export default async function handler(req, res) {
         body += chunk.toString();
       });
       
-      req.on('end', async () => {
+      req.on('end', () => {
         try {
           const userId = parseInt(req.url.split('/').pop());
           const { name, email, age } = JSON.parse(body);
           
-          const existingUser = await redis.get(`user:${userId}`);
+          const userIndex = users.findIndex(u => u.id === userId);
           
-          if (!existingUser) {
+          if (userIndex === -1) {
             return res.status(404).json({
               success: false,
               error: '用户不存在'
             });
           }
           
-          const updatedUser = {
-            ...existingUser,
-            name: name || existingUser.name,
-            email: email || existingUser.email,
-            age: age !== undefined ? age : existingUser.age,
+          users[userIndex] = {
+            ...users[userIndex],
+            name: name || users[userIndex].name,
+            email: email || users[userIndex].email,
+            age: age !== undefined ? age : users[userIndex].age,
             updatedAt: new Date().toISOString()
           };
-          
-          // 更新用户数据
-          await redis.set(`user:${userId}`, updatedUser);
           
           res.setHeader('Content-Type', 'application/json');
           res.status(200).json({
             success: true,
             message: '用户信息更新成功',
-            data: updatedUser
+            data: users[userIndex]
           });
         } catch (error) {
           res.status(400).json({
@@ -197,30 +175,27 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       // 删除用户
       const userId = parseInt(req.url.split('/').pop());
+      const userIndex = users.findIndex(u => u.id === userId);
       
-      const existingUser = await redis.get(`user:${userId}`);
-      
-      if (!existingUser) {
+      if (userIndex === -1) {
         return res.status(404).json({
           success: false,
           error: '用户不存在'
         });
       }
       
-      // 删除用户数据
-      await redis.del(`user:${userId}`);
-      await redis.srem('users:list', userId);
+      const deletedUser = users.splice(userIndex, 1)[0];
       
       res.setHeader('Content-Type', 'application/json');
       res.status(200).json({
         success: true,
         message: '用户删除成功',
-        data: existingUser
+        data: deletedUser
       });
     }
     
   } catch (error) {
-    console.error('Error in users API:', error);
+    console.error('Error in users simple API:', error);
     res.status(500).json({
       success: false,
       error: '服务器内部错误'
