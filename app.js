@@ -58,14 +58,6 @@ const productRoutes = require('./routes/productRoutes');
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
-// 静态文件服务（放在路由之后，作为兜底）
-app.use(express.static('public'));
-
-// 根路径 - 返回 index.html
-app.get('/', (req, res) => {
-	res.sendFile('index.html', { root: 'public' });
-});
-
 // 404处理
 app.use('*', (req, res) => {
 	res.status(404).json({ error: '接口不存在', path: req.originalUrl });
