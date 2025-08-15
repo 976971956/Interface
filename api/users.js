@@ -1,9 +1,26 @@
 import { Redis } from '@upstash/redis';
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+// 检查环境变量
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+console.log('Users API - Environment check:', {
+  hasRedisUrl: !!redisUrl,
+  hasRedisToken: !!redisToken,
+  nodeEnv: process.env.NODE_ENV
 });
+
+// 创建Redis客户端
+let redis;
+try {
+  redis = new Redis({
+    url: redisUrl,
+    token: redisToken,
+  });
+  console.log('Users API - Redis client created successfully');
+} catch (error) {
+  console.error('Users API - Failed to create Redis client:', error);
+}
 
 export default async function handler(req, res) {
   console.log('Users function called:', req.method, req.url);
@@ -16,6 +33,28 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
+  }
+  
+  // 检查环境变量
+  if (!redisUrl || !redisToken) {
+    console.error('Users API - Missing Redis environment variables');
+    return res.status(500).json({
+      success: false,
+      error: 'Redis环境变量未配置',
+      details: {
+        hasRedisUrl: !!redisUrl,
+        hasRedisToken: !!redisToken
+      }
+    });
+  }
+  
+  // 检查Redis客户端
+  if (!redis) {
+    console.error('Users API - Redis client not initialized');
+    return res.status(500).json({
+      success: false,
+      error: 'Redis客户端初始化失败'
+    });
   }
   
   try {

@@ -155,6 +155,35 @@
         </div>
         
         <div class="content">
+            <!-- 数据库初始化部分 -->
+            <div class="section">
+                <h2>🗄️ 数据库管理</h2>
+                <div class="form-group">
+                    <label>系统调试</label>
+                    <button id="debugBtn">系统调试信息</button>
+                    <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                        查看环境变量和系统状态
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>数据库连接测试</label>
+                    <button id="testDatabaseBtn">测试数据库连接</button>
+                    <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                        测试Redis数据库连接是否正常
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>初始化数据库</label>
+                    <button id="initDatabaseBtn">初始化示例数据</button>
+                    <p style="color: #666; font-size: 12px; margin-top: 5px;">
+                        点击此按钮将向Redis数据库中添加示例用户和产品数据
+                    </p>
+                </div>
+                <div id="initResult" class="result" style="display: none;"></div>
+            </div>
+            
             <div class="grid">
                 <!-- 用户管理部分 -->
                 <div class="section">
@@ -249,6 +278,11 @@
             document.getElementById('createUserBtn').addEventListener('click', createUser);
             document.getElementById('updateUserBtn').addEventListener('click', updateUser);
             document.getElementById('deleteUserBtn').addEventListener('click', deleteUser);
+            // 绑定数据库管理按钮事件
+            document.getElementById('debugBtn').addEventListener('click', debugSystem);
+            document.getElementById('testDatabaseBtn').addEventListener('click', testDatabase);
+            document.getElementById('initDatabaseBtn').addEventListener('click', initDatabase);
+            
             // 绑定产品管理按钮事件
             document.getElementById('getProductsBtn').addEventListener('click', getProducts);
             document.getElementById('getProductByIdBtn').addEventListener('click', getProductById);
@@ -299,6 +333,47 @@
                     <div class="status error">❌ 请求失败</div>
                     <pre>${JSON.stringify(result, null, 2)}</pre>
                 `;
+            }
+        }
+        
+        // 数据库相关函数
+        async function debugSystem() {
+            const result = await makeRequest(`${API_BASE}/debug`);
+            showResult('initResult', result);
+            
+            if (result.success) {
+                console.log('系统调试信息:', result.data);
+            } else {
+                console.error('系统调试失败:', result.error);
+            }
+        }
+        
+        async function testDatabase() {
+            const result = await makeRequest(`${API_BASE}/test`);
+            showResult('initResult', result);
+            
+            if (result.success) {
+                console.log('数据库连接测试成功:', result.data);
+            } else {
+                console.error('数据库连接测试失败:', result.error);
+            }
+        }
+        
+        async function initDatabase() {
+            if (!confirm('确定要初始化数据库吗？这将清空现有数据并添加示例数据。')) {
+                return;
+            }
+            
+            const result = await makeRequest(`${API_BASE}/init`, {
+                method: 'POST'
+            });
+            
+            showResult('initResult', result);
+            
+            if (result.success) {
+                alert('数据库初始化成功！现在可以测试用户和产品管理功能了。');
+            } else {
+                alert('数据库初始化失败: ' + (result.error || '未知错误'));
             }
         }
         

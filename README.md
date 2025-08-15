@@ -43,6 +43,8 @@ npm install
 cp env.example .env
 ```
 
+**重要**: 项目已配置了Vercel Upstash Redis数据库，环境变量已包含在 `env.example` 中。如果您使用自己的Redis数据库，请更新相应的连接信息。
+
 ### 3. 启动服务器
 
 开发模式（自动重启）：
@@ -138,17 +140,34 @@ npm start
 
 访问 `http://localhost:3000/public/index.html` 可以使用美观的Web界面测试所有API接口。
 
-## 🔧 部署到阿里云
+### 数据库初始化
 
-### 1. 服务器准备
+首次使用时，请点击页面上的"初始化示例数据"按钮，这将向Redis数据库中添加示例用户和产品数据，然后就可以测试所有CRUD功能了。
+
+## 🚀 快速部署
+
+### Vercel 部署 (推荐)
+
+这是最简单的部署方式，支持Serverless架构：
+
+1. **推送代码到GitHub**
+2. **连接Vercel**: 在 [Vercel](https://vercel.com) 导入GitHub仓库
+3. **配置环境变量**: 添加Redis数据库配置
+4. **一键部署**: 自动部署到全球CDN
+
+详细部署步骤请查看 [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### 传统服务器部署
+
+#### 1. 服务器准备
 - 购买阿里云ECS服务器
 - 安装Node.js和PM2
 
-### 2. 域名配置
+#### 2. 域名配置
 - 在阿里云DNS控制台添加域名解析
 - 将 `jianghuge.com` 指向你的服务器IP
 
-### 3. 部署步骤
+#### 3. 部署步骤
 ```bash
 # 上传代码到服务器
 git clone your-repository
@@ -162,7 +181,7 @@ pm2 start server.js --name jianghuge-api
 # 配置Nginx反向代理（可选）
 ```
 
-### 4. 环境变量配置
+#### 4. 环境变量配置
 生产环境需要修改 `.env` 文件：
 ```
 NODE_ENV=production
@@ -201,12 +220,12 @@ PORT=3000
 
 ## 🚀 下一步扩展
 
-1. **数据库集成**: 连接MySQL或MongoDB
+1. **数据库集成**: ✅ 已集成Redis数据库
 2. **用户认证**: 添加JWT认证
 3. **文件上传**: 支持图片上传功能
 4. **日志系统**: 添加请求日志
 5. **API文档**: 集成Swagger文档
-6. **缓存**: 添加Redis缓存
+6. **缓存**: ✅ 已使用Redis缓存
 7. **监控**: 添加性能监控
 
 ## 📞 联系方式
