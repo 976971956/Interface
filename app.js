@@ -1,43 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const helmet = require('helmet');
-require('dotenv').config();
 
 const app = express();
 
-// 安全中间件 - 允许内联脚本和API连接（禁用升级不安全请求）
-app.use(helmet({
-	contentSecurityPolicy: {
-		useDefaults: true,
-		directives: {
-			defaultSrc: ["'self'"],
-			scriptSrc: ["'self'", "'unsafe-inline'"],
-			styleSrc: ["'self'", "'unsafe-inline'"],
-			imgSrc: ["'self'", "data:", "https:"],
-			connectSrc: ["'self'", "http://localhost:3000", "http://localhost:*"],
-			fontSrc: ["'self'", "https:", "data:"],
-			objectSrc: ["'none'"],
-			mediaSrc: ["'self'"],
-			frameSrc: ["'none'"],
-			upgradeInsecureRequests: null
-		},
-	},
-}));
-
-// CORS配置 - 允许你的域名访问（本地、Vercel、正式域名）
-const allowedOrigins = [
-	/http(s?):\/\/.*\.vercel\.app$/,
-	'https://jianghuge.com',
-	'http://jianghuge.com',
-	'http://localhost:3000'
-];
-app.use(cors({
-	origin: allowedOrigins,
-	credentials: true,
-	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+// 简化的 CORS 配置
+app.use(cors());
 
 // 请求体解析
 app.use(bodyParser.json());
@@ -47,6 +15,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use((req, res, next) => {
 	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
 	next();
+});
+
+// 简单的测试路由
+app.get('/api/health', (req, res) => {
+	res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // 路由
@@ -63,10 +36,10 @@ app.use('*', (req, res) => {
 
 // 错误处理中间件
 app.use((err, req, res, next) => {
-	console.error(err.stack);
+	console.error('Error:', err.message);
 	res.status(500).json({
 		error: '服务器内部错误',
-		message: process.env.NODE_ENV === 'development' ? err.message : '请联系管理员'
+		message: err.message
 	});
 });
 
