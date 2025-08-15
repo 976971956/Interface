@@ -8,9 +8,11 @@
     { "src": "api/debug.js", "use": "@vercel/node" },
     { "src": "api/users.js", "use": "@vercel/node" },
     { "src": "api/products.js", "use": "@vercel/node" },
+    { "src": "api/init.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/init", "dest": "/api/init.js" },
     { "src": "/api/products", "dest": "/api/products.js" },
     { "src": "/api/products/(.*)", "dest": "/api/products.js" },
     { "src": "/api/users", "dest": "/api/users.js" },
