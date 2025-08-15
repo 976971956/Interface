@@ -5,9 +5,11 @@
     { "src": "api/test.js", "use": "@vercel/node" },
     { "src": "api/simple.js", "use": "@vercel/node" },
     { "src": "api/minimal.js", "use": "@vercel/node" },
+    { "src": "api/debug.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/debug", "dest": "/api/debug.js" },
     { "src": "/api/minimal", "dest": "/api/minimal.js" },
     { "src": "/api/simple", "dest": "/api/simple.js" },
     { "src": "/api/test", "dest": "/api/test.js" },
