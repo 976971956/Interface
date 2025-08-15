@@ -346,6 +346,8 @@
                     document.getElementById('userEmail').value = '';
                     document.getElementById('userAge').value = '';
                     alert('用户创建成功！');
+                    // 自动刷新用户列表
+                    await getUsers();
                 } else {
                     alert('用户创建失败: ' + (result.error || '未知错误'));
                 }
@@ -371,6 +373,18 @@
             });
             
             showResult('userResult', result);
+            
+            if (result.success) {
+                // 清空表单
+                document.getElementById('updateUserId').value = '';
+                document.getElementById('updateUserName').value = '';
+                document.getElementById('updateUserEmail').value = '';
+                alert('用户信息更新成功！');
+                // 自动刷新用户列表
+                await getUsers();
+            } else {
+                alert('用户信息更新失败: ' + (result.error || '未知错误'));
+            }
         }
         
         async function deleteUser() {
@@ -388,6 +402,16 @@
             });
             
             showResult('userResult', result);
+            
+            if (result.success) {
+                // 清空表单
+                document.getElementById('deleteUserId').value = '';
+                alert('用户删除成功！');
+                // 自动刷新用户列表
+                await getUsers();
+            } else {
+                alert('用户删除失败: ' + (result.error || '未知错误'));
+            }
         }
         
         // 产品相关函数
@@ -458,6 +482,11 @@
                 document.getElementById('productCategory').value = '';
                 document.getElementById('productDescription').value = '';
                 document.getElementById('productStock').value = '';
+                alert('产品创建成功！');
+                // 自动刷新产品列表
+                await getProducts();
+            } else {
+                alert('产品创建失败: ' + (result.error || '未知错误'));
             }
         }
     </script>
