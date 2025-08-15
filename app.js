@@ -44,9 +44,6 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// 静态文件服务（Vercel 也会直接从 public 提供静态文件；此处用于本地和函数内兜底）
-app.use(express.static('public'));
-
 // 限流配置
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
@@ -61,16 +58,12 @@ const productRoutes = require('./routes/productRoutes');
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
-// 根路径
+// 静态文件服务（放在路由之后，作为兜底）
+app.use(express.static('public'));
+
+// 根路径 - 返回 index.html
 app.get('/', (req, res) => {
-	res.json({
-		message: '欢迎使用 jianghuge.com API',
-		version: '1.0.0',
-		endpoints: {
-			users: '/api/users',
-			products: '/api/products'
-		}
-	});
+	res.sendFile('index.html', { root: 'public' });
 });
 
 // 404处理
