@@ -13,6 +13,31 @@ export default async function handler(req, res) {
     return;
   }
   
+  if (req.method === 'GET') {
+    try {
+      // 检查当前数据状态
+      const userIds = await kv.smembers('users:list') || [];
+      const productIds = await kv.smembers('products:list') || [];
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json({
+        success: true,
+        message: '数据状态检查',
+        data: {
+          users: userIds.length,
+          products: productIds.length,
+          hasData: userIds.length > 0 || productIds.length > 0
+        }
+      });
+    } catch (error) {
+      console.error('Error checking data status:', error);
+      res.status(500).json({
+        success: false,
+        error: '检查数据状态失败'
+      });
+    }
+  }
+  
   if (req.method === 'POST') {
     try {
       // 初始化默认用户数据
@@ -82,7 +107,5 @@ export default async function handler(req, res) {
         error: '初始化失败'
       });
     }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
   }
 } 
