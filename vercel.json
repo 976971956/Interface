@@ -6,18 +6,15 @@
     { "src": "api/simple.js", "use": "@vercel/node" },
     { "src": "api/minimal.js", "use": "@vercel/node" },
     { "src": "api/debug.js", "use": "@vercel/node" },
+    { "src": "api/users.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/users", "dest": "/api/users.js" },
     { "src": "/api/debug", "dest": "/api/debug.js" },
     { "src": "/api/minimal", "dest": "/api/minimal.js" },
     { "src": "/api/simple", "dest": "/api/simple.js" },
     { "src": "/api/test", "dest": "/api/test.js" },
-    { "src": "/api/health", "dest": "/api/index.js" },
-    { "src": "/api/users", "dest": "/api/index.js" },
-    { "src": "/api/products", "dest": "/api/index.js" },
-    { "src": "/api/users/(.*)", "dest": "/api/index.js" },
-    { "src": "/api/products/(.*)", "dest": "/api/index.js" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
