@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -44,13 +43,11 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// 限流配置
-const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 100,
-	message: '请求过于频繁，请稍后再试'
+// 添加请求日志中间件
+app.use((req, res, next) => {
+	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+	next();
 });
-app.use('/api/', limiter);
 
 // 路由
 const userRoutes = require('./routes/userRoutes');
@@ -60,6 +57,7 @@ app.use('/api/products', productRoutes);
 
 // 404处理
 app.use('*', (req, res) => {
+	console.log(`404 - ${req.method} ${req.url}`);
 	res.status(404).json({ error: '接口不存在', path: req.originalUrl });
 });
 
